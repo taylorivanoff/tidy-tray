@@ -71,9 +71,24 @@
         </section>
         <section class="row">
           <label class="checkbox">
+            <input type="checkbox" id="usePolling">
+            Use polling (for network drives)
+          </label>
+        </section>
+        <section id="pollingIntervalSection">
+          <label for="pollingIntervalMs">Polling interval (ms)</label>
+          <input type="number" id="pollingIntervalMs" min="500" max="60000" step="500" placeholder="2000">
+          <span class="help">How often to scan watch folders when polling. 500–60000 ms. Only used when polling is enabled.</span>
+        </section>
+        <section class="row">
+          <label class="checkbox">
             <input type="checkbox" id="dryRun">
             Dry run (log only, don't move files)
           </label>
+        </section>
+        <section>
+          <button type="button" id="runManual" class="secondary">Process watch folders now</button>
+          <span id="runManualStatus" class="status"></span>
         </section>
       </div>
     </div>

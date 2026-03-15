@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'">
+  <title>Tidy Tray – Console</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Consolas", "Monaco", "Courier New", monospace;
+      font-size: 12px;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 8px;
+      overflow: auto;
+      height: 100vh;
+    }
+    .line {
+      white-space: pre-wrap;
+      word-break: break-all;
+      padding: 2px 0;
+      border-bottom: 1px solid #2d2d2d;
+    }
+    .line .time { color: #858585; margin-right: 8px; }
+    .line.info .msg { color: #d4d4d4; }
+    .line.warn .msg { color: #dcdcaa; }
+    .line.error .msg { color: #f48771; }
+    .empty { color: #858585; padding: 16px 0; }
+  </style>
+</head>
+<body>
+  <div id="out"></div>
+  <script>
+    const out = document.getElementById('out');
+    function addLine(entry) {
+      const div = document.createElement('div');
+      div.className = 'line ' + entry.level;
+      div.innerHTML = '<span class="time">[' + entry.time + ']</span><span class="msg">' + escapeHtml(entry.message) + '</span>';
+      out.appendChild(div);
+      out.scrollTop = out.scrollHeight;
+    }
+    function escapeHtml(s) {
+      const d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+    if (window.api) {
+      window.api.onLogInit((entries) => {
+        out.innerHTML = '';
+        if (!entries || entries.length === 0) {
+          out.innerHTML = '<div class="empty">No log entries yet. Changes will appear here when files are processed.</div>';
+        } else {
+          entries.forEach(addLine);
+        }
+      });
+      window.api.onLog(addLine);
+      window.api.requestLogs();
+    } else {
+      out.innerHTML = '<div class="empty">Console not available.</div>';
+    }
+  </script>
+</body>
+</html>

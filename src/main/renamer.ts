@@ -23,10 +23,22 @@ function applyTemplate(
   return out;
 }
 
+export interface ProcessFileResult {
+  success: boolean;
+  destPath?: string;
+  error?: string;
+  type?: 'tv' | 'movie';
+  showName?: string;
+  season?: number;
+  episode?: number;
+  movieTitle?: string;
+  year?: number;
+}
+
 export async function processFile(
   filePath: string,
   settings: AppSettings
-): Promise<{ success: boolean; destPath?: string; error?: string }> {
+): Promise<ProcessFileResult> {
   const parsed = parseFilename(filePath);
   if (!parsed) {
     return { success: false, error: 'Could not parse filename' };
@@ -57,7 +69,7 @@ export async function processFile(
     const destDir = path.dirname(destPath);
 
     if (settings.dryRun) {
-      return { success: true, destPath };
+      return { success: true, destPath, type: 'tv', showName, season: parsed.season, episode: parsed.episode };
     }
 
     await fs.mkdir(destDir, { recursive: true });
@@ -75,7 +87,7 @@ export async function processFile(
       }
     }
     await fs.rename(filePath, finalPath);
-    return { success: true, destPath: finalPath };
+    return { success: true, destPath: finalPath, type: 'tv', showName, season: parsed.season, episode: parsed.episode };
   }
 
   // movie
@@ -92,7 +104,7 @@ export async function processFile(
   const destPath = path.join(baseOut, destFileName);
 
   if (settings.dryRun) {
-    return { success: true, destPath };
+    return { success: true, destPath, type: 'movie', movieTitle: title, year: year || undefined };
   }
 
   await fs.mkdir(baseOut, { recursive: true });
@@ -110,5 +122,5 @@ export async function processFile(
     }
   }
   await fs.rename(filePath, finalPath);
-  return { success: true, destPath: finalPath };
+  return { success: true, destPath: finalPath, type: 'movie', movieTitle: title, year: year || undefined };
 }

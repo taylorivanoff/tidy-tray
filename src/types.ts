@@ -5,8 +5,11 @@ export interface AppSettings {
   movieTemplate: string;
   outputPath: string;
   watcherEnabled: boolean;
+  usePolling: boolean;
+  pollingIntervalMs: number;
   dryRun: boolean;
   mediaExtensions: string[];
+  structureCheckIntervalMs: number;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -16,8 +19,11 @@ export const DEFAULT_SETTINGS: AppSettings = {
   movieTemplate: '{title} ({year}).{ext}',
   outputPath: '',
   watcherEnabled: true,
+  usePolling: false,
+  pollingIntervalMs: 2000,
   dryRun: false,
   mediaExtensions: ['mkv', 'mp4', 'avi', 'mov', 'wmv', 'm4v', 'webm'],
+  structureCheckIntervalMs: 30 * 60 * 1000,
 };
 
 export interface ParsedFile {
@@ -27,4 +33,16 @@ export interface ParsedFile {
   episode?: number;
   year?: number;
   extension: string;
+}
+
+export interface ProcessedRecord {
+  sourcePath: string;
+  destPath: string;
+  processedAt: string;
+  type: 'tv' | 'movie';
+  showName?: string;
+  season?: number;
+  episode?: number;
+  movieTitle?: string;
+  year?: number;
 }

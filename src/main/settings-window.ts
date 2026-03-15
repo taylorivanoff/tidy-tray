@@ -4,8 +4,8 @@ import { getWindowBounds, setWindowBounds } from './store';
 
 let settingsWindow: BrowserWindow | null = null;
 
-const DEFAULT_WIDTH = 560;
-const DEFAULT_HEIGHT = 620;
+const DEFAULT_WIDTH = 580;
+const DEFAULT_HEIGHT = 720;
 
 function getValidatedBounds(): { width: number; height: number; x?: number; y?: number } {
   const saved = getWindowBounds();
@@ -49,6 +49,8 @@ export function createSettingsWindow(
     height: bounds.height,
     x: bounds.x,
     y: bounds.y,
+    minWidth: 480,
+    minHeight: 520,
     show: false,
     webPreferences: {
       preload: preloadPath,

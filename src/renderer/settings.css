@@ -14,7 +14,8 @@ body {
 }
 
 .container {
-  max-width: 560px;
+  max-width: 580px;
+  min-width: 440px;
   padding: 24px 24px 32px;
 }
 

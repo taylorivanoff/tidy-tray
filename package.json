@@ -8,11 +8,19 @@
   "scripts": {
     "build": "tsc",
     "start": "npm run build && electron .",
-    "release": "npm run build && electron-builder --win --x64 --publish=never"
+    "clean:release": "node -e \"try { require('fs').rmSync('dist/win-unpacked', { recursive: true }); } catch (e) { if (e.code !== 'ENOENT' && e.code !== 'EPERM' && e.code !== 'EBUSY') throw e; }\"",
+    "release": "npm run build && npm run clean:release && electron-builder --win --x64 --publish=never"
   },
   "build": {
     "appId": "io.github.taylorivanoff.media-renamer-tray",
     "productName": "Tidy Tray",
+    "files": [
+      "dist/**/*",
+      "resources/**/*",
+      "src/renderer/**/*",
+      "package.json",
+      "installer.nsh"
+    ],
     "win": {
       "icon": "resources/icon.png",
       "target": "nsis"

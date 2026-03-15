@@ -3,7 +3,17 @@ import path from 'path';
 
 let tray: Tray | null = null;
 
-export function createTray(iconPath: string, onOpenSettings: () => void): Tray {
+export type TrayMenuTemplate = Array<{
+  label?: string;
+  type?: 'normal' | 'separator' | 'submenu' | 'checkbox';
+  click?: () => void;
+}>;
+
+export function createTray(
+  iconPath: string,
+  getMenuTemplate: () => TrayMenuTemplate,
+  onDoubleClick: () => void
+): Tray {
   const resolved = path.isAbsolute(iconPath) ? iconPath : path.join(app.getAppPath(), iconPath);
   let image = nativeImage.createFromPath(resolved);
   if (image.isEmpty()) {
@@ -11,15 +21,15 @@ export function createTray(iconPath: string, onOpenSettings: () => void): Tray {
   }
   tray = new Tray(image);
   tray.setToolTip('Tidy Tray');
-  tray.setContextMenu(
-    Menu.buildFromTemplate([
-      { label: 'Open Settings', click: onOpenSettings },
-      { type: 'separator' },
-      { label: 'Quit', click: () => app.quit() },
-    ])
-  );
-  tray.on('double-click', onOpenSettings);
+  setTrayMenu(getMenuTemplate());
+  tray.on('double-click', onDoubleClick);
   return tray;
+}
+
+export function setTrayMenu(template: TrayMenuTemplate): void {
+  if (tray && !tray.isDestroyed()) {
+    tray.setContextMenu(Menu.buildFromTemplate(template as Electron.MenuItemConstructorOptions[]));
+  }
 }
 
 export function getTray(): Tray | null {

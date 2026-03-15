@@ -12,9 +12,13 @@
   const tvTemplateEl = document.getElementById('tvTemplate');
   const movieTemplateEl = document.getElementById('movieTemplate');
   const watcherEnabledEl = document.getElementById('watcherEnabled');
+  const usePollingEl = document.getElementById('usePolling');
+  const pollingIntervalMsEl = document.getElementById('pollingIntervalMs');
   const dryRunEl = document.getElementById('dryRun');
   const saveBtn = document.getElementById('save');
   const saveStatus = document.getElementById('saveStatus');
+  const runManualBtn = document.getElementById('runManual');
+  const runManualStatus = document.getElementById('runManualStatus');
 
   function setStatus(el, text, isError) {
     el.textContent = text;
@@ -49,6 +53,8 @@
     tvTemplateEl.value = s.tvTemplate || '';
     movieTemplateEl.value = s.movieTemplate || '';
     watcherEnabledEl.checked = s.watcherEnabled !== false;
+    usePollingEl.checked = !!s.usePolling;
+    pollingIntervalMsEl.value = String(s.pollingIntervalMs ?? 2000);
     dryRunEl.checked = !!s.dryRun;
     renderWatchPaths(s.watchPaths);
   }
@@ -74,11 +80,25 @@
     if (folder) outputPathEl.value = folder;
   });
 
+  runManualBtn.addEventListener('click', async () => {
+    runManualBtn.disabled = true;
+    setStatus(runManualStatus, 'Processing…');
+    try {
+      const result = await api.runManual();
+      setStatus(runManualStatus, `Done: ${result.processed} processed, ${result.errors} error(s). Open Console for details.`, result.errors > 0);
+    } catch (e) {
+      setStatus(runManualStatus, 'Error: ' + (e && e.message ? e.message : 'Unknown'), true);
+    }
+    runManualBtn.disabled = false;
+    setTimeout(() => setStatus(runManualStatus, ''), 5000);
+  });
+
   saveBtn.addEventListener('click', async () => {
     const paths = [];
     watchPathsList.querySelectorAll('li span').forEach((span) => {
       if (span.textContent) paths.push(span.textContent);
     });
+    const interval = parseInt(pollingIntervalMsEl.value, 10);
     await api.setSettings({
       apiKey: apiKeyEl.value.trim(),
       watchPaths: paths,
@@ -86,6 +106,8 @@
       tvTemplate: tvTemplateEl.value.trim(),
       movieTemplate: movieTemplateEl.value.trim(),
       watcherEnabled: watcherEnabledEl.checked,
+      usePolling: usePollingEl.checked,
+      pollingIntervalMs: isNaN(interval) || interval < 500 ? 2000 : Math.min(60000, interval),
       dryRun: dryRunEl.checked,
     });
     setStatus(saveStatus, 'Saved');

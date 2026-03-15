@@ -13,11 +13,16 @@ export function startWatcher(
   if (!settings.watcherEnabled || settings.watchPaths.length === 0) return;
 
   const exts = new Set(settings.mediaExtensions.map((e) => e.toLowerCase()));
-  watcher = chokidar.watch(settings.watchPaths, {
+  const opts: { persistent: boolean; ignoreInitial: boolean; depth: number; usePolling?: boolean; interval?: number } = {
     persistent: true,
     ignoreInitial: true,
     depth: 2,
-  });
+  };
+  if (settings.usePolling) {
+    opts.usePolling = true;
+    opts.interval = Math.max(500, settings.pollingIntervalMs ?? 2000);
+  }
+  watcher = chokidar.watch(settings.watchPaths, opts);
   watcher.on('add', (filePath: string) => {
     const ext = filePath.split('.').pop()?.toLowerCase();
     if (ext && exts.has(ext)) {

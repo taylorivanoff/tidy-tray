@@ -1,5 +1,10 @@
 # Tidy Tray
 
+[![Release](https://img.shields.io/github/v/release/taylorivanoff/tidy-tray)](https://github.com/taylorivanoff/tidy-tray/releases)
+[![Downloads](https://img.shields.io/github/downloads/taylorivanoff/tidy-tray/total)](https://github.com/taylorivanoff/tidy-tray/releases)
+[![License](https://img.shields.io/github/license/taylorivanoff/tidy-tray)](LICENSE)
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support-yellow?style=flat&logo=buy-me-a-coffee)](https://buymeacoffee.com/taylorivanoff)
+
 **Organize movies and TV shows from your system tray.** A free, open-source alternative to FileBot, TinyMediaManager, Sonarr/Radarr, TVRename, mNamr and other media renamers. Runs in the background, watches your folders, and renames files using [The Movie Database (TMDB)](https://www.themoviedb.org)—no subscription, no GUI clutter.
 
 ---
