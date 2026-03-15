@@ -10,7 +10,7 @@ export function createTray(iconPath: string, onOpenSettings: () => void): Tray {
     image = nativeImage.createEmpty();
   }
   tray = new Tray(image);
-  tray.setToolTip('Tiny Tray');
+  tray.setToolTip('Tidy Tray');
   tray.setContextMenu(
     Menu.buildFromTemplate([
       { label: 'Open Settings', click: onOpenSettings },
@@ -24,4 +24,11 @@ export function createTray(iconPath: string, onOpenSettings: () => void): Tray {
 
 export function getTray(): Tray | null {
   return tray;
+}
+
+export function destroyTray(): void {
+  if (tray && !tray.isDestroyed()) {
+    tray.destroy();
+    tray = null;
+  }
 }

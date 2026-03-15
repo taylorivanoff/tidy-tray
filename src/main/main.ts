@@ -1,7 +1,7 @@
 import { app, ipcMain, dialog, BrowserWindow } from 'electron';
 import path from 'path';
-import { createTray } from './tray';
-import { createSettingsWindow, showSettingsWindow } from './settings-window';
+import { createTray, destroyTray } from './tray';
+import { createSettingsWindow, showSettingsWindow, getSettingsWindow } from './settings-window';
 import { getSettings, setSettings } from './store';
 import { startWatcher, stopWatcher } from './watcher';
 import { processFile } from './renamer';
@@ -45,6 +45,10 @@ if (!gotTheLock) {
 app.on('before-quit', () => {
   isQuitting = true;
   stopWatcher();
+  closeSplash();
+  const win = getSettingsWindow();
+  if (win && !win.isDestroyed()) win.destroy();
+  destroyTray();
 });
 
 app.whenReady().then(() => {
@@ -61,6 +65,10 @@ app.whenReady().then(() => {
 
   createSettingsWindow(() => {}, () => {
     closeSplash();
+    const settings = getSettings();
+    if (!settings.apiKey?.trim() || settings.watchPaths.length === 0) {
+      showSettingsWindow();
+    }
   });
   setTimeout(closeSplash, 5000);
 
