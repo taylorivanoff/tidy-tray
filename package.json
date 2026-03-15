@@ -1,0 +1,37 @@
+{
+  "name": "media-renamer-tray",
+  "description": "System tray app that renames TV and movie files automatically using TMDB.",
+  "author": { "name": "Taylor Ivanoff" },
+  "version": "1.0.0",
+  "repository": "https://github.com/taylorivanoff/tidy-tray",
+  "main": "dist/main/main.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "npm run build && electron .",
+    "release": "npm run build && electron-builder --win --x64 --publish=never"
+  },
+  "build": {
+    "appId": "io.github.taylorivanoff.media-renamer-tray",
+    "productName": "Tidy Tray",
+    "win": {
+      "icon": "resources/icon.png",
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "include": "installer.nsh"
+    }
+  },
+  "dependencies": {
+    "chokidar": "^4.0.1",
+    "electron": "^30.0.3",
+    "electron-store": "^8.2.0"
+  },
+  "devDependencies": {
+    "@types/chokidar": "^1.7.5",
+    "@types/node": "^20.10.0",
+    "electron-builder": "^24.13.3",
+    "typescript": "^5.3.0"
+  }
+}

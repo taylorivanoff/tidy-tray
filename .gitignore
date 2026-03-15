@@ -1,0 +1,10 @@
+node_modules/
+dist/
+*.exe
+*.msi
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.local
+*.local
