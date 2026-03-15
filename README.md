@@ -1,6 +1,6 @@
 # Tidy Tray
 
-**Organize movies and TV shows from your system tray.** A free, open-source alternative to FileBot and other media renamers. Runs in the background, watches your folders, and renames files using [The Movie Database (TMDB)](https://www.themoviedb.org)—no subscription, no GUI clutter.
+**Organize movies and TV shows from your system tray.** A free, open-source alternative to FileBot, TinyMediaManager, Sonarr/Radarr, TVRename, mNamr and other media renamers. Runs in the background, watches your folders, and renames files using [The Movie Database (TMDB)](https://www.themoviedb.org)—no subscription, no GUI clutter.
 
 ---
 

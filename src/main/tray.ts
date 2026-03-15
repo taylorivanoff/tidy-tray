@@ -10,7 +10,7 @@ export function createTray(iconPath: string, onOpenSettings: () => void): Tray {
     image = nativeImage.createEmpty();
   }
   tray = new Tray(image);
-  tray.setToolTip('Media Renamer');
+  tray.setToolTip('Tiny Tray');
   tray.setContextMenu(
     Menu.buildFromTemplate([
       { label: 'Open Settings', click: onOpenSettings },
