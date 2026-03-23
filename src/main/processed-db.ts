@@ -24,6 +24,20 @@ export function wasProcessed(sourcePath: string): boolean {
   return list.some((r) => r.sourcePath === sourcePath);
 }
 
+export function removeProcessedRecord(sourcePath: string): void {
+  const list = getProcessedRecords();
+  const next = list.filter((r) => r.sourcePath !== sourcePath);
+  store.set(KEY, next);
+}
+
+export function removeProcessedRecords(sourcePaths: string[]): void {
+  if (sourcePaths.length === 0) return;
+  const set = new Set(sourcePaths);
+  const list = getProcessedRecords();
+  const next = list.filter((r) => !set.has(r.sourcePath));
+  store.set(KEY, next);
+}
+
 export function clearProcessedRecords(): void {
   store.set(KEY, []);
 }

@@ -71,13 +71,13 @@
         </section>
         <section class="row">
           <label class="checkbox">
-            <input type="checkbox" id="usePolling">
+            <input type="checkbox" id="usePolling" checked>
             Use polling (for network drives)
           </label>
         </section>
         <section id="pollingIntervalSection">
           <label for="pollingIntervalMs">Polling interval (ms)</label>
-          <input type="number" id="pollingIntervalMs" min="500" max="60000" step="500" placeholder="2000">
+          <input type="number" id="pollingIntervalMs" min="500" max="60000" step="500" placeholder="60000">
           <span class="help">How often to scan watch folders when polling. 500–60000 ms. Only used when polling is enabled.</span>
         </section>
         <section class="row">

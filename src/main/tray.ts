@@ -22,6 +22,7 @@ export function createTray(
   tray = new Tray(image);
   tray.setToolTip('Tidy Tray');
   setTrayMenu(getMenuTemplate());
+  tray.on('click', onDoubleClick);
   tray.on('double-click', onDoubleClick);
   return tray;
 }

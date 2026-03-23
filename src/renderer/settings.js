@@ -80,18 +80,25 @@
     if (folder) outputPathEl.value = folder;
   });
 
-  runManualBtn.addEventListener('click', async () => {
-    runManualBtn.disabled = true;
-    setStatus(runManualStatus, 'Processing…');
-    try {
-      const result = await api.runManual();
-      setStatus(runManualStatus, `Done: ${result.processed} processed, ${result.errors} error(s). Open Console for details.`, result.errors > 0);
-    } catch (e) {
-      setStatus(runManualStatus, 'Error: ' + (e && e.message ? e.message : 'Unknown'), true);
-    }
-    runManualBtn.disabled = false;
-    setTimeout(() => setStatus(runManualStatus, ''), 5000);
-  });
+  // Optional (the combined App page may not include a separate `runManual` button).
+  if (runManualBtn && runManualStatus) {
+    runManualBtn.addEventListener('click', async () => {
+      runManualBtn.disabled = true;
+      setStatus(runManualStatus, 'Processing…');
+      try {
+        const result = await api.runManual();
+        setStatus(
+          runManualStatus,
+          `Done: ${result.processed} processed, ${result.errors} error(s). Console shows the changes.`,
+          result.errors > 0
+        );
+      } catch (e) {
+        setStatus(runManualStatus, 'Error: ' + (e && e.message ? e.message : 'Unknown'), true);
+      }
+      runManualBtn.disabled = false;
+      setTimeout(() => setStatus(runManualStatus, ''), 5000);
+    });
+  }
 
   saveBtn.addEventListener('click', async () => {
     const paths = [];

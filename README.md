@@ -5,98 +5,128 @@
 [![License](https://img.shields.io/github/license/taylorivanoff/tidy-tray)](LICENSE)
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support-yellow?style=flat&logo=buy-me-a-coffee)](https://buymeacoffee.com/taylorivanoff)
 
-**Organize movies and TV shows from your system tray.** A free, open-source alternative to FileBot, TinyMediaManager, Sonarr/Radarr, TVRename, mNamr and other media renamers. Runs in the background, watches your folders, and renames files using [The Movie Database (TMDB)](https://www.themoviedb.org)—no subscription, no GUI clutter.
+Tidy Tray is a Windows-first Electron app that automatically organizes movie and TV files using [The Movie Database (TMDB)](https://www.themoviedb.org).  
+It runs from the tray, gives you one combined app page (actions + settings + console), and supports both automatic processing and manual runs.
 
 ---
 
-## Why Tidy Tray?
+## What It Does
 
-| | Tidy Tray | FileBot | Bulk renamers |
-|--|-----------|---------|----------------|
-| **Price** | Free, open source | Paid license | Varies |
-| **Runs in background** | Yes (system tray) | Manual / scheduled | Manual |
-| **Metadata source** | TMDB (free API) | Multiple (some paid) | Often none |
-| **Episode titles** | Yes | Yes | Rarely |
-| **Custom templates** | Yes | Yes | Sometimes |
-| **Dry run** | Yes | Yes | Sometimes |
+- Watches your incoming folders for media files (`.mkv`, `.mp4`, `.avi`, etc.)
+- Detects TV episodes and movies from filenames
+- Looks up proper titles/episode names in TMDB
+- Renames/moves files using your templates
+- Logs every action in the embedded console
 
-If you’re tired of paying for FileBot or running one-off renamers by hand, Tidy Tray gives you automatic, TMDB-powered renaming that stays out of the way until you need to change settings.
-
----
-
-## Features
-
-- **System tray only** — No main window. Open Settings from the tray when you need to configure; the rest of the time it just watches and renames.
-- **Automatic watching** — Add a folder, drop in files like `Show.Name.S01E05.1080p.mkv`, and they’re renamed and moved into a proper structure with real episode titles.
-- **TV shows** → e.g. `Show Name/Season 01/Show Name - S01E05 - Episode Title.mkv`
-- **Movies** → e.g. `Movie Name (2024).mkv`
-- **Configurable templates** — Control folder and filename patterns (placeholders: `{show}`, `{s}`, `{e}`, `{title}`, `{year}`, `{ext}`).
-- **Dry run** — Log what would be renamed without moving files.
-- **TMDB** — Same database used by Plex, Kodi, and others; one free API key is all you need.
+Examples:
+- TV: `Show Name/Season 01/Show Name - S01E05 - Episode Title.mkv`
+- Movie: `Movie Name (2024).mkv`
 
 ---
 
-## Quick start
+## Key Features
 
-### 1. Get a TMDB API key (free)
+- **Combined app page**: actions, settings, and live console in one place
+- **Tray workflow**: click tray icon to open the app quickly
+- **Auto processing enabled by default**
+  - watcher enabled by default
+  - polling enabled by default
+  - default polling interval is **60 seconds**
+- **Manual processing**: run “Process watch folders now” any time
+- **Non-locked file safety**: auto processing waits until files are readable and size-stable (helps avoid files still being copied)
+- **Template-based output**: customize TV and movie naming structure
+- **Dry run mode**: preview changes without moving files
+- **Recurring-folder recovery**
+  - detects recursive path issues
+  - reprocesses affected files
+  - removes empty leftover folders after moves
 
-1. Create an account at [themoviedb.org](https://www.themoviedb.org).
-2. Go to **Settings → API** and request an API key (choose “Developer”).
-3. Copy your **API Key (v3 auth)**.
+---
 
-### 2. Install and run
+## Quick Start
 
-**From source (Node.js required):**
+### 1) Get a TMDB API key (free)
+
+1. Create an account at [themoviedb.org](https://www.themoviedb.org)
+2. Open **Settings -> API**
+3. Request a developer API key
+4. Copy your **API Key (v3 auth)**
+
+### 2) Install and run
+
+From source:
 
 ```bash
-git clone https://github.com/yourusername/tidy-tray.git
+git clone https://github.com/taylorivanoff/tidy-tray.git
 cd tidy-tray
 npm install
 npm start
 ```
 
-**Windows:** After `npm run release`, find the installer in the `dist/` folder.
+Windows package:
 
-### 3. Configure
+```bash
+npm run release
+```
 
-1. Right-click the tray icon → **Open Settings**.
-2. Paste your TMDB API key and click **Test**.
-3. Click **Add folder** and choose the directory where you download or save new media (e.g. `Downloads` or an incoming folder).
-4. Optionally set an **Output folder** (if empty, files are renamed in place).
-5. Click **Save**.
+Installer/output files are created under `dist/`.
 
-New video files (e.g. `.mkv`, `.mp4`, `.avi`) that match common patterns (`S01E05`, `1x05`, or a movie name with a year) will be renamed and moved automatically.
+### 3) Configure in app
+
+1. Click the tray icon to open Tidy Tray
+2. Add your TMDB API key and test it
+3. Add one or more watch folders
+4. Optionally set an output folder (leave blank to organize from watch roots)
+5. Review templates and save
 
 ---
 
-## Filename patterns
+## Processing Modes
 
-Tidy Tray detects:
+### Automatic mode
 
-- **TV:** `Show.Name.S01E05.*`, `Show.Name.1x05.*`, `Show Name s01e05 …`
-- **Movies:** `Movie.Name.2024.*` or similar with a 4-digit year
+- Triggered by new/changed files in watch folders
+- Uses polling (default 60 seconds)
+- Skips files that appear locked/in-progress and retries on later events
 
-The part before the season/episode or year is used as the search query for TMDB.
+### Manual mode
+
+- Runs a deeper scan of watch folders
+- Useful for backfills and cleanup
+- Performs pre-scan structure checks and logs findings
+
+---
+
+## Filename Detection
+
+Tidy Tray parses common patterns:
+
+- TV:
+  - `Show.Name.S01E05.*`
+  - `Show.Name.1x05.*`
+  - `Show Name s01e05 ...`
+- Movies:
+  - `Movie.Name.2024.*`
+  - similar names containing a 4-digit year
+
+The parsed title is used as the TMDB query.
 
 ---
 
 ## Templates
 
-**TV** (default): `{show}/Season {s}/{show} - S{s}E{e} - {title}.{ext}`
+Default TV template:
 
-- `{show}` — Show name  
-- `{s}` — Season (zero-padded)  
-- `{e}` — Episode (zero-padded)  
-- `{title}` — Episode title from TMDB  
-- `{ext}` — File extension  
+`{show}/Season {s}/{show} - S{s}E{e} - {title}.{ext}`
 
-**Movie** (default): `{title} ({year}).{ext}`
+Default movie template:
 
-- `{title}` — Movie title  
-- `{year}` — Release year  
-- `{ext}` — File extension  
+`{title} ({year}).{ext}`
 
-Change these in Settings to match your preferred layout.
+Supported placeholders:
+
+- TV: `{show}`, `{s}`, `{e}`, `{title}`, `{ext}`
+- Movie: `{title}`, `{year}`, `{ext}`
 
 ---
 
@@ -105,17 +135,17 @@ Change these in Settings to match your preferred layout.
 | Command | Description |
 |--------|-------------|
 | `npm start` | Build and run the app |
-| `npm run build` | Compile TypeScript only |
+| `npm run build` | Compile TypeScript |
 | `npm run release` | Build Windows installer (NSIS) |
 
 ---
 
-## Tech stack
+## Tech Stack
 
-- [Electron](https://www.electronjs.org/) — Cross-platform desktop
-- [TMDB API](https://www.themoviedb.org/documentation/api) — Movie and TV metadata
-- [chokidar](https://github.com/paulmillr/chokidar) — Folder watching
-- [electron-store](https://github.com/sindresorhus/electron-store) — Settings persistence
+- [Electron](https://www.electronjs.org/)
+- [TMDB API](https://www.themoviedb.org/documentation/api)
+- [chokidar](https://github.com/paulmillr/chokidar)
+- [electron-store](https://github.com/sindresorhus/electron-store)
 
 ---
 
@@ -127,4 +157,4 @@ This product uses the [TMDB API](https://www.themoviedb.org/documentation/api) b
 
 ## License
 
-MIT — use it, change it, ship it. See [LICENSE](LICENSE) for details.
+MIT. See [LICENSE](LICENSE).

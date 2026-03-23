@@ -4,6 +4,24 @@ import type { AppSettings, ParsedFile } from '../types';
 import * as tmdb from './tmdb';
 import { parseFilename } from './parser';
 
+function getWatchRootForFile(filePath: string, watchPaths: string[]): string | null {
+  const absFile = path.resolve(filePath);
+  let best: string | null = null;
+
+  for (const watchPath of watchPaths) {
+    const trimmed = watchPath?.trim();
+    if (!trimmed) continue;
+    const absWatch = path.resolve(trimmed);
+    const prefix = absWatch.endsWith(path.sep) ? absWatch : absWatch + path.sep;
+
+    if (absFile === absWatch || absFile.startsWith(prefix)) {
+      if (!best || absWatch.length > best.length) best = absWatch;
+    }
+  }
+
+  return best;
+}
+
 function sanitizeFileName(name: string): string {
   return name.replace(/[<>:"/\\|?*]/g, '').trim() || 'Unknown';
 }
@@ -21,6 +39,23 @@ function applyTemplate(
     out = out.replace(new RegExp(`\\{${k}\\}`, 'gi'), String(v));
   }
   return out;
+}
+
+async function removeEmptyParentDirs(startDir: string, stopDir: string): Promise<void> {
+  let current = path.resolve(startDir);
+  const stop = path.resolve(stopDir);
+
+  while (current.startsWith(stop) && current !== stop) {
+    try {
+      const entries = await fs.readdir(current);
+      if (entries.length > 0) return;
+      await fs.rmdir(current);
+      current = path.dirname(current);
+    } catch {
+      // If directory isn't empty anymore or inaccessible, stop cleanup.
+      return;
+    }
+  }
 }
 
 export interface ProcessFileResult {
@@ -47,7 +82,12 @@ export async function processFile(
   const apiKey = settings.apiKey?.trim();
   if (!apiKey) return { success: false, error: 'TMDB API key not set' };
 
-  const baseOut = settings.outputPath || path.dirname(filePath);
+  // If `outputPath` is empty, we want to write relative to the configured watch folder root
+  // (not the current file's directory), otherwise already-organized files get nested again.
+  const baseOut =
+    settings.outputPath?.trim() ||
+    getWatchRootForFile(filePath, settings.watchPaths) ||
+    path.dirname(filePath);
 
   if (parsed.type === 'tv') {
     const show = await tmdb.searchTv(apiKey, parsed.title);
@@ -86,7 +126,10 @@ export async function processFile(
         break;
       }
     }
-    await fs.rename(filePath, finalPath);
+    if (path.resolve(filePath) !== path.resolve(finalPath)) {
+      await fs.rename(filePath, finalPath);
+      await removeEmptyParentDirs(path.dirname(filePath), baseOut);
+    }
     return { success: true, destPath: finalPath, type: 'tv', showName, season: parsed.season, episode: parsed.episode };
   }
 
@@ -121,6 +164,9 @@ export async function processFile(
       break;
     }
   }
-  await fs.rename(filePath, finalPath);
+  if (path.resolve(filePath) !== path.resolve(finalPath)) {
+    await fs.rename(filePath, finalPath);
+    await removeEmptyParentDirs(path.dirname(filePath), baseOut);
+  }
   return { success: true, destPath: finalPath, type: 'movie', movieTitle: title, year: year || undefined };
 }

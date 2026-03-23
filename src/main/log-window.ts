@@ -1,13 +1,32 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, type WebContents } from 'electron';
 import path from 'path';
 import { getLogs, setOnNewEntry } from './logger';
 
 let logWindow: BrowserWindow | null = null;
 
-function sendToLogWindow(channel: string, ...args: unknown[]): void {
-  if (logWindow && !logWindow.isDestroyed() && logWindow.webContents) {
-    logWindow.webContents.send(channel, ...args);
+const logSinks = new Set<WebContents>();
+let streamingInitialized = false;
+
+function sendToSinks(channel: string, ...args: unknown[]): void {
+  for (const sink of logSinks) {
+    if (!sink.isDestroyed()) sink.send(channel, ...args);
   }
+}
+
+export function initLogStreaming(): void {
+  if (streamingInitialized) return;
+  streamingInitialized = true;
+
+  setOnNewEntry((entry) => {
+    sendToSinks('log', entry);
+  });
+
+  ipcMain.on('log-request', (event) => {
+    const sender = event.sender;
+    logSinks.add(sender);
+    sender.once('destroyed', () => logSinks.delete(sender));
+    sender.send('log-init', getLogs());
+  });
 }
 
 export function getLogWindow(): BrowserWindow | null {
@@ -15,6 +34,7 @@ export function getLogWindow(): BrowserWindow | null {
 }
 
 export function createOrShowLogWindow(): void {
+  initLogStreaming();
   if (logWindow && !logWindow.isDestroyed()) {
     logWindow.show();
     logWindow.focus();
@@ -38,15 +58,8 @@ export function createOrShowLogWindow(): void {
     },
   });
 
-  setOnNewEntry((entry) => sendToLogWindow('log', entry));
-
-  const onLogRequest = (): void => sendToLogWindow('log-init', getLogs());
-  ipcMain.on('log-request', onLogRequest);
-
   logWindow.on('closed', () => {
     logWindow = null;
-    setOnNewEntry(null);
-    ipcMain.removeListener('log-request', onLogRequest);
   });
 
   logWindow.loadFile(logHtmlPath);

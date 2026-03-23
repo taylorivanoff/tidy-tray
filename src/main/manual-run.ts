@@ -37,7 +37,8 @@ export async function getFilesToProcess(settings: AppSettings): Promise<string[]
   const exts = new Set(settings.mediaExtensions.map((e) => e.toLowerCase()));
   const all: string[] = [];
   for (const watchPath of settings.watchPaths) {
-    const files = await findMediaFiles(watchPath, exts, 2, 0);
+    // Use a deeper scan so already-recursed folders from earlier runs get fixed.
+    const files = await findMediaFiles(watchPath, exts, 5, 0);
     all.push(...files);
   }
   return all;

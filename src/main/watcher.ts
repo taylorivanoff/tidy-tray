@@ -16,19 +16,25 @@ export function startWatcher(
   const opts: { persistent: boolean; ignoreInitial: boolean; depth: number; usePolling?: boolean; interval?: number } = {
     persistent: true,
     ignoreInitial: true,
-    depth: 2,
+    // Keep deeper scanning so nested folders created by previous runs are still picked up.
+    depth: 5,
   };
   if (settings.usePolling) {
     opts.usePolling = true;
     opts.interval = Math.max(500, settings.pollingIntervalMs ?? 2000);
   }
   watcher = chokidar.watch(settings.watchPaths, opts);
-  watcher.on('add', (filePath: string) => {
+  const handleCandidate = (filePath: string): void => {
     const ext = filePath.split('.').pop()?.toLowerCase();
     if (ext && exts.has(ext)) {
       onFileAdd(filePath);
     }
-  });
+  };
+
+  // Polling drivers often surface files as "add" before the writer is done.
+  // Handling "change" lets us retry when the file becomes readable/stable.
+  watcher.on('add', handleCandidate);
+  watcher.on('change', handleCandidate);
 }
 
 export function stopWatcher(): void {
